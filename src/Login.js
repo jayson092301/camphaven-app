@@ -6,14 +6,16 @@ import { Button } from "react-native-paper";
 
 export default function Login() {
     return(
-        <View>
+        <View style={{backgroundColor:'black'}}>
             <View>
-                <Image
-                source={require('../assets/img/logo.png')}
-                style={styles.logo}/>
+                <View>
+                    <Image
+                    source={require('../assets/img/logo.png')}
+                    style={{height:200, width:500, marginBottom:200, marginTop: 100}}/>
+                </View>
             </View>
-            <View style={{backgroundColor:'#fff', margin:10, borderTopLeftRadius: 100, borderTopRightRadius: 100}}>
-                <View style={styles.btnlogin}>
+            <View style={{backgroundColor:'#fff', borderTopLeftRadius: 100, borderTopRightRadius: 100}}>
+                <View style={{backgroundColor:'#000', borderRadius:20, marginLeft:80, marginRight:80, marginTop: 80}}>
                     <Button mode="outlined" onPress={() => console.log('Pressed')} labelStyle={{ color: '#E8CDB2', fontSize: 15 }}>
                         Log in
                     </Button>
@@ -21,7 +23,7 @@ export default function Login() {
                 <View>
                     <Text style={{ color: 'black', textAlign: 'center', margin:20, fontSize:15}}>or</Text>
                 </View>
-                <View style={styles.btnsignup}>
+                <View style={{backgroundColor:'#000', borderRadius:20, marginLeft:80, marginRight:80,}}>
                     <Button mode="outlined" onPress={() => console.log('Pressed')} labelStyle={{ color: '#E8CDB2', fontSize: 15 }}>
                         Sign Up
                     </Button>
