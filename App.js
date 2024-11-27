@@ -8,7 +8,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
     <View>
-      <Login/>
+      <Signin/>
       <StatusBar style="auto" />
     </View>
     </SafeAreaView>

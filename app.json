@@ -2,6 +2,7 @@
   "expo": {
     "name": "camphaven-app",
     "slug": "camphaven-app",
+    "scheme": "camphaven",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
