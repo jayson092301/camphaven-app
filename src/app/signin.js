@@ -16,10 +16,10 @@ export default function Signin(){
         <View style={{backgroundColor:'#fff',}}>
             <View style={{flexDirection:'row', justifyContent: 'space-between'}}>
                 <View style={{ marginLeft: 10 }}>
-                <IconButton
-                    icon="arrow-left"  
-                    size={20}
-                    onPress={() => router.back()} 
+                    <IconButton
+                        icon="arrow-left"  
+                        size={20}
+                        onPress={() => router.back()} 
                     />
                 </View>
                 <View>
@@ -58,7 +58,7 @@ export default function Signin(){
                 </Text>
             </View>
             <View style={{backgroundColor:'#000', borderRadius:20, marginLeft:80, marginRight:80, marginBottom:200}}>
-                <Button mode="outlined" onPress={() => console.log('Navigate to Home Page')} labelStyle={{ color: '#E8CDB2', fontSize: 20, fontFamily:'Italianno' }}>
+                <Button mode="outlined" onPress={() => router.push('/home_page')} labelStyle={{ color: '#E8CDB2', fontSize: 20, fontFamily:'Italianno' }}>
                     Log In
                 </Button>
             </View>

@@ -22,7 +22,7 @@ export default function Login() {
             </View>
             <View style={{backgroundColor:'#fff', borderTopLeftRadius: 100, borderTopRightRadius: 100}}>
                 <View style={{backgroundColor:'#000', borderRadius:20, marginLeft:80, marginRight:80, marginTop: 80}}>
-                    <Button mode="outlined" onPress={() => console.log('Pressed')} labelStyle={{ color: '#E8CDB2', fontSize: 20, fontFamily:'Italianno' }}>
+                    <Button mode="outlined" onPress={() => router.push('/signin')} labelStyle={{ color: '#E8CDB2', fontSize: 20, fontFamily:'Italianno' }}>
                         Log in
                     </Button>
                 </View>
@@ -30,7 +30,7 @@ export default function Login() {
                     <Text style={{ color: 'black', textAlign: 'center', margin:20, fontSize:15}}>or</Text>
                 </View>
                 <View style={{backgroundColor:'#000', borderRadius:20, marginLeft:80, marginRight:80, marginBottom:80}}>
-                    <Button mode="outlined" onPress={() => router.push('/signin')} labelStyle={{ color: '#E8CDB2', fontSize: 20, fontFamily:'Italianno' }}>
+                    <Button mode="outlined" onPress={() => router.push('/register')} labelStyle={{ color: '#E8CDB2', fontSize: 20, fontFamily:'Italianno' }}>
                         Sign Up
                     </Button>
                 </View>
