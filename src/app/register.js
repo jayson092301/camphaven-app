@@ -63,7 +63,7 @@ export default function Register() {
                 />
             </View>
             <View style={{backgroundColor:'#000', borderRadius:20, marginLeft:80, marginRight:80, marginBottom:200}}>
-                <Button mode="outlined" onPress={() => router.push('/signin')} labelStyle={{ color: '#E8CDB2', fontSize: 20, fontFamily:'Italianno' }}>
+                <Button mode="outlined" onPress={() => router.push('signin')} labelStyle={{ color: '#E8CDB2', fontSize: 20, fontFamily:'Italianno' }}>
                     Submit
                 </Button>
             </View>

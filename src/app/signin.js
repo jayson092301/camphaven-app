@@ -52,13 +52,13 @@ export default function Signin(){
             <View style={{ alignItems: 'center', marginTop: 20 }}>
                 <Text style={{fontFamily:'Italianno', fontSize:30}}>
                     Don't have an account?{' '}
-                    <Text style={{ color: 'red' }} onPress={() => router.push('/register')}>
+                    <Text style={{ color: 'red' }} onPress={() => router.push('register')}>
                         Register
                     </Text>
                 </Text>
             </View>
             <View style={{backgroundColor:'#000', borderRadius:20, marginLeft:80, marginRight:80, marginBottom:200}}>
-                <Button mode="outlined" onPress={() => router.push('/home_page')} labelStyle={{ color: '#E8CDB2', fontSize: 20, fontFamily:'Italianno' }}>
+                <Button mode="outlined" onPress={() => router.replace('dashboard')} labelStyle={{ color: '#E8CDB2', fontSize: 20, fontFamily:'Italianno' }}>
                     Log In
                 </Button>
             </View>
