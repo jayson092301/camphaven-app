@@ -1,25 +1,55 @@
 import React from "react";
-import { Text, View } from "react-native";
-import { Icon, IconButton, Button } from "react-native-paper";
+import { Text, View, Alert } from "react-native";
+import { IconButton, Button, TextInput } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
-import { TextInput } from "react-native-paper";
-import { Colors } from "react-native/Libraries/NewAppScreen";
+import supabase from "../../supabase"; // Ensure Supabase is configured correctly
 
-export default function Signin(){
-
-    const [text, setText] = React.useState("");
-    const [fontsLoaded] = useFonts({Italiano: require('../../assets/fonts/Italianno-Regular.ttf'),});
+export default function Signin() {
+    const [email, setEmail] = React.useState("");
+    const [password, setPassword] = React.useState("");
+    const [fontsLoaded] = useFonts({
+        Italiano: require('../../assets/fonts/Italianno-Regular.ttf'),
+    });
     const router = useRouter();
 
-    return(
-        <View style={{backgroundColor:'#fff',}}>
-            <View style={{flexDirection:'row', justifyContent: 'space-between'}}>
+    // Handle Sign-In
+    const handleLogin = async () => {
+        if (!email || !password) {
+            Alert.alert("Error", "Please fill in both fields.");
+            return;
+        }
+
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            Alert.alert("Success", "You have successfully logged in!");
+            router.replace("dashboard");
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Error", error.message);
+        }
+    };
+
+    if (!fontsLoaded) {
+        return <Text>Loading...</Text>;
+    }
+
+    return (
+        <View style={{ backgroundColor: '#fff' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <View style={{ marginLeft: 10 }}>
                     <IconButton
-                        icon="arrow-left"  
+                        icon="arrow-left"
                         size={20}
-                        onPress={() => router.back()} 
+                        onPress={() => router.back()}
                     />
                 </View>
                 <View>
@@ -30,35 +60,47 @@ export default function Signin(){
                     />
                 </View>
             </View>
-            <View style={{marginTop:50, marginLeft:20, marginRight:20}}>
-                <Text style={{fontSize:60, fontFamily:'Italianno'}}>Welcome Back.</Text>
-                <Text style={{fontSize:80, fontFamily:'Italianno'}}>You've been missed!</Text>
+            <View style={{ marginTop: 50, marginLeft: 20, marginRight: 20 }}>
+                <Text style={{ fontSize: 60, fontFamily: 'Italianno' }}>Welcome Back.</Text>
+                <Text style={{ fontSize: 80, fontFamily: 'Italianno' }}>You've been missed!</Text>
             </View>
-            <View style={{backgroundColor: '#D9D9D9', margin: 30}}>
+            <View style={{ backgroundColor: '#D9D9D9', margin: 30 }}>
                 <TextInput
                     label="Email"
                     mode="outlined"
-                    style={{margin:20, marginTop:50}}
-                    value={text}
-                    onChangeText={text => setText(text)}
+                    style={{ margin: 20, marginTop: 50 }}
+                    value={email}
+                    onChangeText={setEmail}
                 />
-                 <TextInput
+                <TextInput
                     label="Password"
                     mode="outlined"
                     secureTextEntry
-                    style={{margin:20, marginBottom:50}}
+                    style={{ margin: 20, marginBottom: 50 }}
+                    value={password}
+                    onChangeText={setPassword}
                 />
             </View>
             <View style={{ alignItems: 'center', marginTop: 20 }}>
-                <Text style={{fontFamily:'Italianno', fontSize:30}}>
+                <Text style={{ fontFamily: 'Italianno', fontSize: 30 }}>
                     Don't have an account?{' '}
                     <Text style={{ color: 'red' }} onPress={() => router.push('register')}>
                         Register
                     </Text>
                 </Text>
             </View>
-            <View style={{backgroundColor:'#000', borderRadius:20, marginLeft:80, marginRight:80, marginBottom:200}}>
-                <Button mode="outlined" onPress={() => router.replace('dashboard')} labelStyle={{ color: '#E8CDB2', fontSize: 20, fontFamily:'Italianno' }}>
+            <View style={{
+                backgroundColor: '#000',
+                borderRadius: 20,
+                marginLeft: 80,
+                marginRight: 80,
+                marginBottom: 200,
+            }}>
+                <Button
+                    mode="outlined"
+                    onPress={handleLogin}
+                    labelStyle={{ color: '#E8CDB2', fontSize: 20, fontFamily: 'Italianno' }}
+                >
                     Log In
                 </Button>
             </View>

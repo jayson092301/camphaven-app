@@ -8,7 +8,7 @@ export default function Dashboard() {
         }}>
             <Tabs.Screen name = 'index'
                 options={{
-                    title:'HomePage',
+                    title:'Home',
                     tabBarIcon: ({focused}) => < Icon source = {focused ? 'home-variant': 'home-variant-outline'} size={24} color= 'black'/>
                 }}
             />
