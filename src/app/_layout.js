@@ -14,6 +14,7 @@ export default function RootLayout () {
                 <Stack.Screen name="signin"/>
                 <Stack.Screen name="register"/>
                 <Stack.Screen name="dashboard"/>
+                <Stack.Screen name="admin"/>
             </Stack>
             <StatusBar style="auto" />
         </SafeAreaView>

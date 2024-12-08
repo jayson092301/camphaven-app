@@ -1,9 +1,10 @@
 import React from "react";
-import { View, Text, Alert } from "react-native";
+import { View, Text, Alert, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { IconButton, Button, TextInput } from "react-native-paper";
 import { useFonts } from "expo-font";
 import supabase from "../../supabase"; // Ensure this points to your Supabase client initialization file.
+
 
 export default function Register() {
     const [fullName, setFullName] = React.useState("");
@@ -48,6 +49,7 @@ export default function Register() {
     };
 
     return (
+        <ScrollView>
         <View>
             <View style={{ marginLeft: 10 }}>
                 <IconButton
@@ -121,5 +123,6 @@ export default function Register() {
                 </Button>
             </View>
         </View>
+        </ScrollView>
     );
 }
