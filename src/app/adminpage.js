@@ -15,8 +15,8 @@ export default function Admi_Page() {
             </View>
             <View style={{justifyContent:'center', alignItems:'center', flexDirection: 'column', marginTop:250}}>
                 <View>
-                    <TouchableOpacity style={styles.button} onPress={() => console.log('manage listing')}>
-                        <Text style={styles.buttonText}>Manage Listing</Text>
+                    <TouchableOpacity style={styles.button} onPress={() => router.push('admin_form')}>
+                        <Text style={styles.buttonText}>Add Land</Text>
                     </TouchableOpacity>
                 </View>
                 <View>
