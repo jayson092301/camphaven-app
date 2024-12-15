@@ -72,7 +72,7 @@ export default function AdminForm() {
                     onChangeText={setAddress}
                 />
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={() => router.push('camp_listing')}>
+                    <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                         <Text style={styles.buttonText}>Save</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.button} onPress={() => router.back()}>

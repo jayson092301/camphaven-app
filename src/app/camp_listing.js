@@ -9,6 +9,8 @@ export default function CampListing() {
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
     const [address, setAddress] = useState("");
+    const [listingTypeMenuVisible, setListingTypeMenuVisible] = useState(false);
+    const [listingType, setListingType] = useState(null); // State for listing type
     const [amenities, setAmenities] = useState({
         WiFi: false,
         AirConditioning: false,
@@ -22,12 +24,14 @@ export default function CampListing() {
     const [universities, setUniversities] = useState([]);
     const [university, setUniversity] = useState(null); // State to store selected university
 
+    const listingTypes = ["Room", "Apartment", "Dorm"];
+
     // Fetch the owners from Supabase
     useEffect(() => {
         const fetchOwners = async () => {
             try {
                 const { data, error } = await supabase
-                    .from("apartment_owners")  // Assuming "apartment_owners" is the correct table name
+                    .from("apartment_owners") // Assuming "apartment_owners" is the correct table name
                     .select("owner_id, name");
 
                 if (error) {
@@ -62,7 +66,7 @@ export default function CampListing() {
 
     // Function to handle price input and ensure only numbers are entered
     const handlePriceChange = (text) => {
-        const numericText = text.replace(/[^0-9]/g, ''); // Replace any non-numeric characters
+        const numericText = text.replace(/[^0-9.]/g, ""); // Replace any non-numeric characters
         setPrice(numericText);
     };
 
@@ -74,45 +78,95 @@ export default function CampListing() {
         });
     };
 
-    // Submit function to handle form submission (this could be adapted for Supabase)
+    // Submit function to handle form submission
     const handleSubmit = async () => {
-        if (!title || !description || !price || !address || !amenities || !owner || !university) {
+        if (!title || !description || !price || !address || !amenities || !owner || !university || !listingType) {
             Alert.alert("Error", "Please fill out all fields.");
             return;
         }
-
+    
         try {
-            const { data, error } = await supabase
+            // Step 1: Insert into the listings table
+            const { data: listingData, error: listingError } = await supabase
                 .from("listings")
                 .insert([{
                     title,
                     description,
                     price,
                     address,
-                    amenities: JSON.stringify(amenities),  // Store amenities as a JSON string
-                    owner_id: owner,  // Store the selected owner ID
+                    amenities: JSON.stringify(amenities), // Store amenities as a JSON string
+                    owner_id: owner, // Store the selected owner ID
                     university_id: university, // Store university_id
-                    status: 'available', // Set default status as 'available'
-                }]);
-
-            if (error) {
-                throw error;
+                    status: 'available', // Default status
+                }])
+                .select();
+    
+            if (listingError) {
+                throw listingError;
             }
-
+    
+            const listingId = listingData[0].id; // Get the ID of the inserted listing
+    
+            // Step 2: Call the database function to insert into the specific table
+            const { error: insertError } = await supabase.rpc('insert_listing', {
+                listing_type: listingType, // Room, Apartment, or Dorm
+                title,
+                description,
+                price,
+                address,
+                amenities: JSON.stringify(amenities), // Store amenities as a JSON string
+                safety_rating: null, // Optional, can be replaced with a real value if available
+                owner_id: owner,
+                status: 'available',
+                university_id: university
+            });
+    
+            if (insertError) {
+                throw insertError;
+            }
+    
             Alert.alert("Success", "Listing created successfully!");
-            router.push('image')
-
+            router.push('image'); // Navigate to the image page
+    
         } catch (error) {
             Alert.alert("Error", error.message);
         }
     };
-
+    
     return (
         <ScrollView>
             <Provider>
                 <View style={{ padding: 20 }}>
-                    <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' }}>Create Camp Listing</Text>
+                    <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 20, textAlign: "center" }}>
+                        Create Camp Listing
+                    </Text>
                     <Card style={{ marginBottom: 20, padding: 20, backgroundColor: "#D9D9D9" }}>
+                        {/* Listing Type Dropdown */}
+                        <Menu
+                            visible={listingTypeMenuVisible}
+                            onDismiss={() => setListingTypeMenuVisible(false)}
+                            anchor={
+                                <TextInput
+                                    label="Listing Type"
+                                    mode="outlined"
+                                    style={{ marginBottom: 15 }}
+                                    value={listingType || ""}
+                                    onFocus={() => setListingTypeMenuVisible(true)} // Show menu on focus
+                                />
+                            }
+                        >
+                            {listingTypes.map((type) => (
+                                <Menu.Item
+                                    key={type}
+                                    onPress={() => {
+                                        setListingType(type);
+                                        setListingTypeMenuVisible(false);
+                                    }}
+                                    title={type}
+                                />
+                            ))}
+                        </Menu>
+
                         <TextInput
                             label="Boarding house name"
                             mode="outlined"
@@ -132,7 +186,7 @@ export default function CampListing() {
                             mode="outlined"
                             style={{ marginBottom: 15 }}
                             value={price}
-                            onChangeText={handlePriceChange}  // Using the new function here
+                            onChangeText={handlePriceChange}
                             keyboardType="numeric"
                         />
                         <TextInput
@@ -142,6 +196,7 @@ export default function CampListing() {
                             value={address}
                             onChangeText={setAddress}
                         />
+
                         {/* Dropdown for selecting Owner */}
                         <Menu
                             visible={ownerMenuVisible}
@@ -151,8 +206,8 @@ export default function CampListing() {
                                     label="Owner Name"
                                     mode="outlined"
                                     style={{ marginBottom: 15 }}
-                                    value={owner ? owners.find(o => o.owner_id === owner)?.name : ''}
-                                    onFocus={() => setOwnerMenuVisible(true)} // Show menu on focus
+                                    value={owner ? owners.find((o) => o.owner_id === owner)?.name : ""}
+                                    onFocus={() => setOwnerMenuVisible(true)}
                                 />
                             }
                         >
@@ -160,8 +215,8 @@ export default function CampListing() {
                                 <Menu.Item
                                     key={ownerItem.owner_id}
                                     onPress={() => {
-                                        setOwner(ownerItem.owner_id); // Set the owner_id
-                                        setOwnerMenuVisible(false); // Close the dropdown
+                                        setOwner(ownerItem.owner_id);
+                                        setOwnerMenuVisible(false);
                                     }}
                                     title={ownerItem.name}
                                 />
@@ -177,8 +232,8 @@ export default function CampListing() {
                                     label="Select University"
                                     mode="outlined"
                                     style={{ marginBottom: 15 }}
-                                    value={university ? universities.find(u => u.university_id === university)?.name : ''}
-                                    onFocus={() => setUniversityMenuVisible(true)} // Show menu on focus
+                                    value={university ? universities.find((u) => u.university_id === university)?.name : ""}
+                                    onFocus={() => setUniversityMenuVisible(true)}
                                 />
                             }
                         >
@@ -186,22 +241,21 @@ export default function CampListing() {
                                 <Menu.Item
                                     key={universityItem.university_id}
                                     onPress={() => {
-                                        setUniversity(universityItem.university_id); // Set the university_id
-                                        setUniversityMenuVisible(false); // Close the dropdown
+                                        setUniversity(universityItem.university_id);
+                                        setUniversityMenuVisible(false);
                                     }}
                                     title={universityItem.name}
-                                    right={<TextInput.Icon icon="menu-down" onPress={() => setMenuVisible(true)} />}
                                 />
                             ))}
                         </Menu>
                     </Card>
 
                     <Card style={{ padding: 20 }}>
-                        <Text style={{ marginBottom: 10, fontWeight: 'bold' }}>Select Amenities</Text>
-                        {['WiFi', 'AirConditioning', 'Parking', 'Water'].map((amenity) => (
-                            <View key={amenity} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                        <Text style={{ marginBottom: 10, fontWeight: "bold" }}>Select Amenities</Text>
+                        {Object.keys(amenities).map((amenity) => (
+                            <View key={amenity} style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
                                 <Checkbox
-                                    status={amenities[amenity] ? 'checked' : 'unchecked'}
+                                    status={amenities[amenity] ? "checked" : "unchecked"}
                                     onPress={() => handleAmenityChange(amenity)}
                                 />
                                 <Text>{amenity}</Text>
@@ -209,8 +263,7 @@ export default function CampListing() {
                         ))}
                     </Card>
 
-                    {/* Centered Button */}
-                    <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 20 }}>
+                    <View style={{ justifyContent: "center", alignItems: "center", marginTop: 20 }}>
                         <TouchableOpacity
                             style={{
                                 width: 200,
@@ -220,7 +273,7 @@ export default function CampListing() {
                                 alignItems: "center",
                                 borderRadius: 10,
                             }}
-                            onPress={() => router.push('image')}  // Updated to use submitListing
+                            onPress={handleSubmit}
                         >
                             <Text style={{ color: "#E8CDB2", fontSize: 18 }}>Submit Listing</Text>
                         </TouchableOpacity>
