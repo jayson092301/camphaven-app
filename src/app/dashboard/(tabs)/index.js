@@ -1,58 +1,71 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
 import { Searchbar } from "react-native-paper";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import supabase from "../../../../supabase"; // Import supabase client
 
 export default function HomePage() {
-    const [searchQuery, setSearchQuery] = React.useState("");
+    const [searchQuery, setSearchQuery] = useState("");
     const [images, setImages] = useState([]); // State to store images
+    const [filteredData, setFilteredData] = useState([]); // Filtered search results
+    const [selected, setSelected] = useState(""); // Track the selected button
     const [fontsLoaded] = useFonts({
         Italiano: require("../../../../assets/fonts/Italianno-Regular.ttf"),
     });
     const router = useRouter();
-    const [selected, setSelected] = useState(""); // Track the selected button
 
-    // Function to fetch images based on the selected type (Apartment, Room, Dorm)
-    const fetchImages = async (listingId) => {
-        const { data, error } = await supabase
-            .from("tblimage")
-            .select("image_id, image_url, upload_date, is_primary")
-            .eq("listing_id", listingId); // Fetch images based on listing_id
+    // Function to fetch data based on the type
+    const fetchData = async (type) => {
+        let tableMapping = {
+            Room: { table: "room", foreignKey: "room_listing_id" },
+            Apartment: { table: "apartment", foreignKey: "apartment_listing_id" },
+            Dorm: { table: "dorm", foreignKey: "dorm_listing_id" },
+        };
 
-        if (error) {
-            console.error("Error fetching images:", error);
-        } else {
-            setImages(data); // Set the fetched images to state
+        const { table, foreignKey } = tableMapping[type] || {};
+        if (!table) return;
+
+        try {
+            // Fetch records from the selected table
+            const { data: records, error: tableError } = await supabase.from(table).select("*");
+            if (tableError) throw tableError;
+
+            // Fetch images for each record
+            const imagePromises = records.map(async (record) => {
+                const { data: images, error: imageError } = await supabase
+                    .from("tblimage")
+                    .select("image_url, is_primary")
+                    .eq(foreignKey, record.listing_id);
+
+                if (imageError) console.error("Image fetch error:", imageError);
+
+                // Return record with selected primary image or fallback
+                const primaryImage = images?.find((img) => img.is_primary) || images?.[0];
+                return { ...record, image: primaryImage?.image_url || null };
+            });
+
+            const results = await Promise.all(imagePromises);
+            setImages(results);
+            setFilteredData(results); // Initialize filtered data
+        } catch (error) {
+            console.error("Error fetching data:", error);
         }
     };
 
-    // Map type to the corresponding integer listing_id
-    const handlePress = (type) => {
-        setSelected(type); // Set the selected button type
-        console.log(`${type} selected`);
-
-        // Map the selected type to the corresponding listing_id
-        let listingId = 0;
-        if (type === "Room") {
-            listingId = 1;  // Map "Room" to listing_id = 1
-        } else if (type === "Apartment") {
-            listingId = 2;  // Map "Apartment" to listing_id = 2
-        } else if (type === "Dorm") {
-            listingId = 3;  // Map "Dorm" to listing_id = 3
-        }
-
-        fetchImages(listingId); // Fetch images based on the listing_id (integer)
-    };
+    // Filter data based on search query
+    useEffect(() => {
+        const filtered = images.filter((item) =>
+            item.title?.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFilteredData(filtered);
+    }, [searchQuery, images]);
 
     return (
         <View style={styles.container}>
             {/* Title */}
             <View style={styles.titleContainer}>
-                <Text style={styles.titleText}>
-                    Let's find the best place to live!
-                </Text>
+                <Text style={styles.titleText}>Let's find the best place to live!</Text>
             </View>
 
             {/* Search Bar */}
@@ -65,9 +78,7 @@ export default function HomePage() {
             </View>
 
             {/* Subtitle */}
-            <View>
-                <Text style={styles.subtitle}>Search for . . .</Text>
-            </View>
+            <Text style={styles.subtitle}>Search for . . .</Text>
 
             {/* Buttons */}
             <View style={styles.buttonRow}>
@@ -76,14 +87,17 @@ export default function HomePage() {
                         key={type}
                         style={[
                             styles.button,
-                            selected === type && styles.buttonSelected, // Apply selected style
+                            selected === type && styles.buttonSelected,
                         ]}
-                        onPress={() => handlePress(type)}
+                        onPress={() => {
+                            setSelected(type);
+                            fetchData(type);
+                        }}
                     >
                         <Text
                             style={[
                                 styles.buttonText,
-                                selected === type && styles.buttonTextSelected, // Change text color if selected
+                                selected === type && styles.buttonTextSelected,
                             ]}
                         >
                             {type}
@@ -92,88 +106,81 @@ export default function HomePage() {
                 ))}
             </View>
 
-            {/* Display Images */}
-            <View style={styles.imageContainer}>
-                {images.length > 0 ? (
-                    images.map((image) => (
-                        <View key={image.image_id} style={styles.imageItem}>
-                            <Image
-                                source={{ uri: image.image_url }} // Display image from Supabase URL
-                                style={styles.image}
-                            />
-                            {image.is_primary && (
-                                <Text style={styles.primaryLabel}>Primary</Text>
+            {/* Scrollable Content */}
+            <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+                {filteredData.length > 0 ? (
+                    filteredData.map((item, index) => (
+                        <View key={index} style={styles.cardContainer}>
+                            {/* Image */}
+                            {item.image ? (
+                                <Image
+                                    source={{ uri: item.image }}
+                                    style={styles.image}
+                                />
+                            ) : (
+                                <Text style={styles.noImageText}>No images available</Text>
                             )}
+
+                            {/* Details */}
+                            <View style={styles.detailsContainer}>
+                                <Text style={styles.titleText}>{item.title}</Text>
+                                <Text style={styles.addressText}>{item.address}</Text>
+                                <Text style={styles.priceText}>₱ {item.price}</Text>
+                                <Text style={styles.amenitiesText}>
+                                    {item.amenities
+                                        ? Object.keys(JSON.parse(item.amenities))
+                                            .filter((key) => JSON.parse(item.amenities)[key])
+                                            .map((key, index, arr) => (
+                                                <Text key={index}>
+                                                    {key}
+                                                    {index < arr.length - 1 && " | "}
+                                                </Text>
+                                            ))
+                                        : "Amenities: None"}
+                                </Text>
+
+                            </View>
                         </View>
                     ))
                 ) : (
-                    <Text>No images found</Text>
+                    <Text style={styles.noDataText}>No data found</Text>
                 )}
-            </View>
+            </ScrollView>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
-        padding: 20,
-    },
-    titleContainer: {
-        alignItems: "center",
-        marginBottom: 20,
-    },
-    titleText: {
-        fontFamily: "Italianno",
-        fontSize: 30,
-    },
-    searchContainer: {
-        marginBottom: 20,
-    },
-    subtitle: {
-        fontSize: 20,
-        marginBottom: 10,
-    },
-    buttonRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-    },
+    container: { flex: 1, backgroundColor: "#fff", padding: 20 },
+    titleContainer: { alignItems: "center", marginBottom: 20 },
+    titleText: { fontFamily: "Italianno", fontSize: 30 },
+    searchContainer: { marginBottom: 20 },
+    subtitle: { fontSize: 20, marginBottom: 10 },
+    buttonRow: { flexDirection: "row", justifyContent: "space-between" },
     button: {
         width: 120,
         paddingVertical: 10,
-        backgroundColor: "#ccc", // Default button background color
+        backgroundColor: "#ccc",
         borderRadius: 5,
         alignItems: "center",
         marginVertical: 5,
     },
-    buttonSelected: {
-        backgroundColor: "#000", // Selected button background color
-    },
-    buttonText: {
-        color: "#000", // Default button text color
-        fontSize: 16,
-    },
-    buttonTextSelected: {
-        color: "#E8CDB2", // Selected button text color
-    },
-    imageContainer: {
-        marginTop: 20,
-        flexDirection: "row",
-        flexWrap: "wrap",
-        justifyContent: "space-between",
-    },
-    imageItem: {
-        margin: 10,
-    },
-    image: {
-        width: 100,
-        height: 100,
+    buttonSelected: { backgroundColor: "#000" },
+    buttonText: { color: "#000", fontSize: 16 },
+    buttonTextSelected: { color: "#E8CDB2" },
+    scrollContainer: { flex: 1, marginTop: 10 },
+    cardContainer: {
+        marginVertical: 10,
+        backgroundColor: "#f9f9f9",
         borderRadius: 10,
+        overflow: "hidden",
+        elevation: 3,
     },
-    primaryLabel: {
-        marginTop: 5,
-        color: "green",
-        fontWeight: "bold",
-    },
+    image: { width: "100%", height: 200 },
+    detailsContainer: { padding: 10, backgroundColor: "#fff" },
+    addressText: { fontSize: 16, color: "#555", marginBottom: 5 },
+    priceText: { fontSize: 18, fontWeight: "600", color: "#007BFF", marginBottom: 5 },
+    amenitiesText: { fontSize: 14, color: "#777" },
+    noImageText: { textAlign: "center", color: "#999", fontSize: 16, marginVertical: 10 },
+    noDataText: { textAlign: "center", fontSize: 18, color: "#999", marginTop: 20 },
 });
