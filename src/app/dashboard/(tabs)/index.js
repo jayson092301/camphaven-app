@@ -23,33 +23,64 @@ export default function HomePage() {
             Dorm: { table: "dorm", foreignKey: "dorm_listing_id" },
         };
 
-        const { table, foreignKey } = tableMapping[type] || {};
-        if (!table) return;
+        if (type === "All") {
+            // Fetch all types (Room, Apartment, Dorm)
+            const types = ["Room", "Apartment", "Dorm"];
+            const allData = [];
+            for (let type of types) {
+                const { table, foreignKey } = tableMapping[type] || {};
+                if (table) {
+                    try {
+                        const { data: records, error: tableError } = await supabase.from(table).select("*");
+                        if (tableError) throw tableError;
 
-        try {
-            // Fetch records from the selected table
-            const { data: records, error: tableError } = await supabase.from(table).select("*");
-            if (tableError) throw tableError;
+                        const imagePromises = records.map(async (record) => {
+                            const { data: images, error: imageError } = await supabase
+                                .from("tblimage")
+                                .select("image_url, is_primary")
+                                .eq(foreignKey, record.listing_id);
 
-            // Fetch images for each record
-            const imagePromises = records.map(async (record) => {
-                const { data: images, error: imageError } = await supabase
-                    .from("tblimage")
-                    .select("image_url, is_primary")
-                    .eq(foreignKey, record.listing_id);
+                            if (imageError) console.error("Image fetch error:", imageError);
 
-                if (imageError) console.error("Image fetch error:", imageError);
+                            const primaryImage = images?.find((img) => img.is_primary) || images?.[0];
+                            return { ...record, image: primaryImage?.image_url || null };
+                        });
 
-                // Return record with selected primary image or fallback
-                const primaryImage = images?.find((img) => img.is_primary) || images?.[0];
-                return { ...record, image: primaryImage?.image_url || null };
-            });
+                        const results = await Promise.all(imagePromises);
+                        allData.push(...results);
+                    } catch (error) {
+                        console.error("Error fetching data:", error);
+                    }
+                }
+            }
+            setImages(allData);
+            setFilteredData(allData); // Initialize filtered data
+        } else {
+            const { table, foreignKey } = tableMapping[type] || {};
+            if (!table) return;
 
-            const results = await Promise.all(imagePromises);
-            setImages(results);
-            setFilteredData(results); // Initialize filtered data
-        } catch (error) {
-            console.error("Error fetching data:", error);
+            try {
+                const { data: records, error: tableError } = await supabase.from(table).select("*");
+                if (tableError) throw tableError;
+
+                const imagePromises = records.map(async (record) => {
+                    const { data: images, error: imageError } = await supabase
+                        .from("tblimage")
+                        .select("image_url, is_primary")
+                        .eq(foreignKey, record.listing_id);
+
+                    if (imageError) console.error("Image fetch error:", imageError);
+
+                    const primaryImage = images?.find((img) => img.is_primary) || images?.[0];
+                    return { ...record, image: primaryImage?.image_url || null };
+                });
+
+                const results = await Promise.all(imagePromises);
+                setImages(results);
+                setFilteredData(results); // Initialize filtered data
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
         }
     };
 
@@ -60,6 +91,12 @@ export default function HomePage() {
         );
         setFilteredData(filtered);
     }, [searchQuery, images]);
+
+    useEffect(() => {
+        if (!selected) {
+            fetchData("All"); // Default to "All" when no button is selected
+        }
+    }, [selected]);
 
     return (
         <View style={styles.container}>
@@ -82,7 +119,7 @@ export default function HomePage() {
 
             {/* Buttons */}
             <View style={styles.buttonRow}>
-                {["Apartment", "Room", "Dorm"].map((type) => (
+                {["All", "Apartment", "Room", "Dorm"].map((type) => (
                     <TouchableOpacity
                         key={type}
                         style={[
@@ -113,10 +150,7 @@ export default function HomePage() {
                         <View key={index} style={styles.cardContainer}>
                             {/* Image */}
                             {item.image ? (
-                                <Image
-                                    source={{ uri: item.image }}
-                                    style={styles.image}
-                                />
+                                <Image source={{ uri: item.image }} style={styles.image} />
                             ) : (
                                 <Text style={styles.noImageText}>No images available</Text>
                             )}
@@ -138,7 +172,6 @@ export default function HomePage() {
                                             ))
                                         : "Amenities: None"}
                                 </Text>
-
                             </View>
                         </View>
                     ))
@@ -158,7 +191,7 @@ const styles = StyleSheet.create({
     subtitle: { fontSize: 20, marginBottom: 10 },
     buttonRow: { flexDirection: "row", justifyContent: "space-between" },
     button: {
-        width: 120,
+        width: 90,
         paddingVertical: 10,
         backgroundColor: "#ccc",
         borderRadius: 5,

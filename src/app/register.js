@@ -44,22 +44,34 @@ export default function Register() {
         }
 
         try {
+            // Step 1: Register the user with Supabase Auth
+            const { user, error: authError } = await supabase.auth.signUp({
+                email,
+                password
+            });
+
+            if (authError) {
+                throw authError; // If there is an error, throw it
+            }
+
+            // Step 2: Insert additional user data into your custom 'users' table
             const { data, error } = await supabase
                 .from("users")
-                .insert([{ 
+                .insert([{
+                    user_id: user.id,  // Store the user ID from Supabase Auth
                     name: fullName, 
                     email, 
                     phone_number: phoneNumber, 
-                    password, 
                     university_id: university // Store university_id in the users table
                 }]);
 
             if (error) {
-                throw error;
+                throw error; // If there is an error, throw it
             }
 
             Alert.alert("Success", "User registered successfully!");
-            router.push("signin");
+            router.push("signin"); // Navigate to signin screen
+
         } catch (error) {
             Alert.alert("Error", error.message);
         }
