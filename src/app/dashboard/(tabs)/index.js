@@ -22,9 +22,9 @@ export default function HomePage() {
             Apartment: { table: "apartment", foreignKey: "apartment_listing_id" },
             Dorm: { table: "dorm", foreignKey: "dorm_listing_id" },
         };
-
+    
+        // Default fetch for "All" types
         if (type === "All") {
-            // Fetch all types (Room, Apartment, Dorm)
             const types = ["Room", "Apartment", "Dorm"];
             const allData = [];
             for (let type of types) {
@@ -33,19 +33,24 @@ export default function HomePage() {
                     try {
                         const { data: records, error: tableError } = await supabase.from(table).select("*");
                         if (tableError) throw tableError;
-
+    
                         const imagePromises = records.map(async (record) => {
                             const { data: images, error: imageError } = await supabase
                                 .from("tblimage")
-                                .select("image_url, is_primary")
+                                .select("image_url, is_primary, image_id") 
                                 .eq(foreignKey, record.listing_id);
-
+    
                             if (imageError) console.error("Image fetch error:", imageError);
-
+    
                             const primaryImage = images?.find((img) => img.is_primary) || images?.[0];
-                            return { ...record, image: primaryImage?.image_url || null };
+                            return {
+                                ...record,
+                                type: type, // Explicitly assign the type
+                                image: primaryImage?.image_url || null,
+                                image_id: primaryImage?.image_id,
+                            };
                         });
-
+    
                         const results = await Promise.all(imagePromises);
                         allData.push(...results);
                     } catch (error) {
@@ -58,23 +63,29 @@ export default function HomePage() {
         } else {
             const { table, foreignKey } = tableMapping[type] || {};
             if (!table) return;
-
+    
             try {
                 const { data: records, error: tableError } = await supabase.from(table).select("*");
                 if (tableError) throw tableError;
-
+    
                 const imagePromises = records.map(async (record) => {
                     const { data: images, error: imageError } = await supabase
                         .from("tblimage")
-                        .select("image_url, is_primary")
+                        .select("image_url, is_primary, image_id")
                         .eq(foreignKey, record.listing_id);
-
+    
                     if (imageError) console.error("Image fetch error:", imageError);
-
+    
                     const primaryImage = images?.find((img) => img.is_primary) || images?.[0];
-                    return { ...record, image: primaryImage?.image_url || null };
+                    return {
+                        ...record,
+                        type: type,  // Explicitly assign the type for each record
+                        image: primaryImage?.image_url || null,
+                        image_id: primaryImage?.image_id,
+                        listing_id: record.listing_id,
+                    };
                 });
-
+    
                 const results = await Promise.all(imagePromises);
                 setImages(results);
                 setFilteredData(results); // Initialize filtered data
@@ -83,6 +94,7 @@ export default function HomePage() {
             }
         }
     };
+    
 
     // Filter data based on search query
     useEffect(() => {
@@ -148,9 +160,18 @@ export default function HomePage() {
                 {filteredData.length > 0 ? (
                     filteredData.map((item, index) => (
                         <View key={index} style={styles.cardContainer}>
-                            {/* Image */}
+                            {/* Image with TouchableOpacity */}
                             {item.image ? (
+                                <TouchableOpacity
+                                onPress={() => {
+                                    // Navigate to the details page with the listing_id
+                                        console.log('Item:', item);
+                                        console.log(`/dashboard/details/${item.type}/${item.listing_id}`);
+                                        router.push(`/dashboard/details/${item.type}/${item.listing_id}`);
+                                }}
+                            >
                                 <Image source={{ uri: item.image }} style={styles.image} />
+                            </TouchableOpacity>
                             ) : (
                                 <Text style={styles.noImageText}>No images available</Text>
                             )}
@@ -163,13 +184,13 @@ export default function HomePage() {
                                 <Text style={styles.amenitiesText}>
                                     {item.amenities
                                         ? Object.keys(JSON.parse(item.amenities))
-                                            .filter((key) => JSON.parse(item.amenities)[key])
-                                            .map((key, index, arr) => (
-                                                <Text key={index}>
-                                                    {key}
-                                                    {index < arr.length - 1 && " | "}
-                                                </Text>
-                                            ))
+                                              .filter((key) => JSON.parse(item.amenities)[key])
+                                              .map((key, index, arr) => (
+                                                  <Text key={index}>
+                                                      {key}
+                                                      {index < arr.length - 1 && " | "}
+                                                  </Text>
+                                              ))
                                         : "Amenities: None"}
                                 </Text>
                             </View>
