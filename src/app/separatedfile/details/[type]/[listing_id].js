@@ -3,6 +3,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { View, Text, ActivityIndicator, StyleSheet, Image, ScrollView, TouchableOpacity, Modal, Linking } from 'react-native';
 import supabase from '../../../../../supabase';
 import { IconButton } from 'react-native-paper';
+import { useRouter } from 'expo-router';
 
 const ListingDetails = () => {
   const { type, listing_id } = useLocalSearchParams();
@@ -14,6 +15,8 @@ const ListingDetails = () => {
   const [images, setImages] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [ownerPhoneNumber, setOwnerPhoneNumber] = useState('');
+
+  const router = useRouter ();
 
   useEffect(() => {
     if (!type || !listing_id) {
@@ -155,6 +158,16 @@ const ListingDetails = () => {
 
   return (
     <View style={styles.detailsContainer}>
+      <View>
+        <IconButton
+          icon="arrow-left"
+          size={20}
+          onPress={() => router.back()}
+        />
+      </View>
+      <View>
+        <Text style={{fontSize: 18, fontWeight: 'bold', paddingLeft: 10, paddingBottom:10}}> Details </Text>
+      </View>
       <ScrollView style={{ marginBottom: 150, borderBottomWidth: 1, borderBottomColor: 'black', paddingBottom: 30 }}>
         {image && (
           <TouchableOpacity onPress={handleImageClick}>
@@ -192,9 +205,12 @@ const ListingDetails = () => {
           </View>
         </View>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={() => console.log('Press')}>
-            <Text style={styles.buttonText}>Rent Now</Text>
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push(`/separatedfile/rentNow?listing_id=${listing_id}&type=${type}`)}
+        >
+          <Text style={styles.buttonText}>Book Now</Text>
+        </TouchableOpacity>
         </View>
       </View>
 

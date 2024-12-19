@@ -166,8 +166,8 @@ export default function HomePage() {
                                 onPress={() => {
                                     // Navigate to the details page with the listing_id
                                         console.log('Item:', item);
-                                        console.log(`/dashboard/details/${item.type}/${item.listing_id}`);
-                                        router.push(`/dashboard/details/${item.type}/${item.listing_id}`);
+                                        console.log(`/separatedfile/details/${item.type}/${item.listing_id}`);
+                                        router.push(`/separatedfile/details/${item.type}/${item.listing_id}`);
                                 }}
                             >
                                 <Image source={{ uri: item.image }} style={styles.image} />
