@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
-import { View, Text, ActivityIndicator, StyleSheet, Image, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Image, ScrollView, TouchableOpacity, Modal, Linking } from 'react-native';
 import supabase from '../../../../../supabase';
 import { IconButton } from 'react-native-paper';
 
@@ -13,6 +13,7 @@ const ListingDetails = () => {
   const [image, setImage] = useState(null);
   const [images, setImages] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [ownerPhoneNumber, setOwnerPhoneNumber] = useState('');
 
   useEffect(() => {
     if (!type || !listing_id) {
@@ -71,20 +72,23 @@ const ListingDetails = () => {
   const fetchOwnerName = async (owner_id) => {
     try {
       const { data, error } = await supabase
-        .from('apartment_owners') // Assuming the owners' data is stored in the 'owners' table
-        .select('name')
+        .from('apartment_owners')
+        .select('name, phone_number')
         .eq('owner_id', owner_id)
         .single();
-
+  
       if (error) {
-        console.error('Error fetching owner name:', error);
+        console.error('Error fetching owner details:', error);
         setOwnerName('Unknown');
+        setOwnerPhoneNumber('');
       } else {
         setOwnerName(data.name || 'Unknown');
+        setOwnerPhoneNumber(data.phone_number || '');
       }
     } catch (err) {
-      console.error('Unexpected error fetching owner name:', err);
+      console.error('Unexpected error fetching owner details:', err);
       setOwnerName('Unknown');
+      setOwnerPhoneNumber('');
     }
   };
 
@@ -124,6 +128,31 @@ const ListingDetails = () => {
     );
   }
 
+  const handleMessagePress = (phoneNumber) => {
+    if (!phoneNumber) {
+      alert('Phone number not available.');
+      return;
+    }
+  
+    const url = `whatsapp://send?phone=${phoneNumber}`;
+    Linking.openURL(url).catch(() => {
+      alert('WhatsApp is not installed on your device.');
+    });
+  };
+
+  const handleCallPress = (phoneNumber) => {
+    if (!phoneNumber) {
+      alert('Phone number not available.');
+      return;
+    }
+  
+    const url = `tel:${phoneNumber}`;
+    Linking.openURL(url).catch(() => {
+      alert('Unable to make a call.');
+    });
+  };
+  
+
   return (
     <View style={styles.detailsContainer}>
       <ScrollView style={{ marginBottom: 150, borderBottomWidth: 1, borderBottomColor: 'black', paddingBottom: 30 }}>
@@ -146,8 +175,20 @@ const ListingDetails = () => {
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 20 }}>
           <Text style={{ fontSize: 24, fontWeight: 'bold' }}>{ownerName}</Text>
           <View style={{ flexDirection: 'row' }}>
-            <IconButton icon="message" iconColor={'black'} size={20} onPress={() => console.log('Pressed')} />
-            <IconButton icon="phone" iconColor={'black'} size={20} onPress={() => console.log('Pressed')} />
+            <IconButton
+              icon="message"
+              iconColor={'black'}
+              size={20}
+              onPress={() => handleMessagePress(ownerPhoneNumber)}
+            />
+
+            <IconButton
+              icon="phone"
+              iconColor={'black'}
+              size={20}
+              onPress={() => handleCallPress(ownerPhoneNumber)}
+            />
+
           </View>
         </View>
         <View style={styles.buttonContainer}>
