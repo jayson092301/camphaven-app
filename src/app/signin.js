@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View, Alert, ScrollView} from "react-native";
+import { Text, View, Alert, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import { IconButton, Button, TextInput } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
@@ -44,8 +44,7 @@ export default function Signin() {
     }
 
     return (
-        <ScrollView>
-            <View style={{ backgroundColor: '#fff', }}>
+            <View style={{ backgroundColor: '#fff', flex:1 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <View style={{ marginLeft: 10 }}>
                         <IconButton
@@ -62,11 +61,12 @@ export default function Signin() {
                         />
                     </View>
                 </View>
-                <View style={{ marginTop: 50, marginLeft: 20, marginRight: 20 }}>
-                    <Text style={{ fontSize: 60, fontFamily: 'Italianno' }}>Welcome Back.</Text>
-                    <Text style={{ fontSize: 80, fontFamily: 'Italianno' }}>You've been missed!</Text>
+                <ScrollView>
+                <View style={{ marginTop: 30, marginLeft: 20, marginRight: 20, marginBottom:70 }}>
+                    <Text style={{ fontSize: 20, fontFamily: 'Italianno' }}>Welcome Back.</Text>
+                    <Text style={{ fontSize: 45, fontFamily: 'Italianno', fontWeight:'bold' }}>You've been missed!</Text>
                 </View>
-                <View style={{ backgroundColor: '#D9D9D9', margin: 30 }}>
+                <View style={{ backgroundColor: '#D9D9D9', margin: 30, borderRadius:10 }}>
                     <TextInput
                         label="Email"
                         mode="outlined"
@@ -83,30 +83,40 @@ export default function Signin() {
                         onChangeText={setPassword}
                     />
                 </View>
-                <View style={{ alignItems: 'center', marginTop: 20 }}>
-                    <Text style={{ fontFamily: 'Italianno', fontSize: 30 }}>
+                </ScrollView>
+                <View style={styles.submitContainer}>
+                    <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                    <Text style={styles.buttonText}>Log in</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={{ alignItems: 'center', marginTop: 10, marginBottom:20 }}>
+                    <Text style={{ fontFamily: 'Italianno', fontSize: 20 }}>
                         Don't have an account?{' '}
-                        <Text style={{ color: 'red' }} onPress={() => router.push('register')}>
+                        <Text style={{ color: 'red', fontWeight:'bold' }} onPress={() => router.push('registrationForm')}>
                             Register
                         </Text>
                     </Text>
                 </View>
-                <View style={{
-                    backgroundColor: '#000',
-                    borderRadius: 20,
-                    marginLeft: 80,
-                    marginRight: 80,
-                    marginBottom: 200,
-                }}>
-                    <Button
-                        mode="outlined"
-                        onPress={handleLogin}
-                        labelStyle={{ color: '#E8CDB2', fontSize: 20, fontFamily: 'Italianno' }}
-                    >
-                        Log In
-                    </Button>
-                </View>
             </View>
-        </ScrollView>
     );
 }
+
+const styles = StyleSheet.create({
+    submitContainer: {
+        alignItems: 'center',
+        margin: 20
+      },
+      button: {
+        width: '100%',
+        paddingVertical: 12,
+        backgroundColor: '#000',
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      buttonText: {
+        color: '#E8CDB2',
+        fontSize: 18,
+        fontWeight: '600',
+      },
+})

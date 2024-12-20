@@ -19,6 +19,7 @@ export default function RootLayout () {
                 <Stack.Screen name="admin_form"/>
                 <Stack.Screen name="camp_listing"/>
                 <Stack.Screen name="image"/>
+                <Stack.Screen name="registrationForm"/>
             </Stack>
             <StatusBar style="auto" />
         </SafeAreaView>
