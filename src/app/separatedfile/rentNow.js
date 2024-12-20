@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Platform, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Platform, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { useLocalSearchParams } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import supabase from '../../../supabase'; // Adjust the import according to your Supabase client configuration
+import supabase from '../../../supabase';
+import { useRouter } from 'expo-router';
 
 const RentNow = () => {
-  const { type, title } = useLocalSearchParams(); // Changed listing_id to title for dynamic fetching
+  const { title, ownerName } = useLocalSearchParams(); // Receive title and ownerName
 
   // State to manage the input values
-  const [titleInput, setTitleInput] = useState('');
-  const [typeInput, setTypeInput] = useState(type || '');
-  const [ownerName, setOwnerName] = useState('');
+  const [titleInput, setTitleInput] = useState(title || '');  // Default to passed title
+  const [ownerNameInput, setOwnerNameInput] = useState(ownerName || '');  // Default to passed ownerName
   const [userName, setUserName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
@@ -20,52 +20,7 @@ const RentNow = () => {
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  useEffect(() => {
-    if (title) {
-      fetchListingDetails(title);
-    }
-  }, [title]);
-
-  const fetchListingDetails = async (listingTitle) => {
-    try {
-      const { data: listingData, error: listingError } = await supabase
-        .from('listings')
-        .select('title, owner_id')
-        .eq('title', listingTitle)
-        .single();
-
-      if (listingError) {
-        throw listingError;
-      }
-
-      if (listingData) {
-        setTitleInput(listingData.title);
-        fetchOwnerName(listingData.owner_id);
-      }
-    } catch (error) {
-      console.error('Error fetching listing details:', error.message);
-    }
-  };
-
-  const fetchOwnerName = async (ownerId) => {
-    try {
-      const { data: ownerData, error: ownerError } = await supabase
-        .from('apartment_owners')
-        .select('name')
-        .eq('owner_id', ownerId)
-        .single();
-
-      if (ownerError) {
-        throw ownerError;
-      }
-
-      if (ownerData) {
-        setOwnerName(ownerData.name);
-      }
-    } catch (error) {
-      console.error('Error fetching owner name:', error.message);
-    }
-  };
+  const router = useRouter();
 
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -80,6 +35,24 @@ const RentNow = () => {
     }
   };
 
+  const handleSubmit = () => {
+    Alert.alert(
+      'Confirm Submission',
+      'Are you sure you want to submit this booking?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'OK',
+          onPress: () => router.replace('dashboard'),
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
   return (
     <View style={styles.mainContainer}>
       <Text style={styles.title}>Booking Form</Text>
@@ -90,21 +63,15 @@ const RentNow = () => {
           onChangeText={setTitleInput}
           mode="outlined"
           style={styles.input}
-        />
-        <TextInput
-          label="Type"
-          value={typeInput}
-          onChangeText={setTypeInput}
-          mode="outlined"
-          style={styles.input}
-          editable={false}
+          editable={false} // Disable editing since it's passed data
         />
         <TextInput
           label="Owner Name"
-          value={ownerName}
-          onChangeText={setOwnerName}
+          value={ownerNameInput}
+          onChangeText={setOwnerNameInput}
           mode="outlined"
           style={styles.input}
+          editable={false} // Disable editing since it's passed data
         />
         <TextInput
           label="User Name"
@@ -159,7 +126,7 @@ const RentNow = () => {
         )}
       </ScrollView>
       <View style={styles.submitContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => console.log('Submit')}>
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <Text style={styles.buttonText}>Submit</Text>
         </TouchableOpacity>
       </View>

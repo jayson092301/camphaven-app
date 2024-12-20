@@ -207,10 +207,11 @@ const ListingDetails = () => {
         <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push(`/separatedfile/rentNow?listing_id=${listing_id}&type=${type}`)}
+          onPress={() => router.push(`/separatedfile/rentNow?listing_id=${listing_id}&type=${type}&title=${details.title}&ownerName=${ownerName}`)}
         >
           <Text style={styles.buttonText}>Book Now</Text>
         </TouchableOpacity>
+
         </View>
       </View>
 
