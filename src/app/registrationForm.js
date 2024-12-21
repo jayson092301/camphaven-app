@@ -58,13 +58,14 @@ export default function RegistrationForm() {
 
             // Now insert the user data into the custom user table
             const { error: insertError } = await supabase
-                .from("user")
+                .from("users")
                 .insert([
                     {
-                        user_id: user.id,
+                        
                         name: fullName,
                         email: email,
                         phone_number: phoneNumber,
+                        password: password,
                         university_id: university,
                         created_at: new Date(),
                     },
@@ -104,7 +105,7 @@ export default function RegistrationForm() {
                     <Text style={{ fontFamily: "Italianno", fontSize: 40 }}>Complete the following</Text>
                 </View>
                 <ScrollView contentContainerStyle={styles.scrollContainer}>
-                    <View style={{ backgroundColor: "#D9D9D9", margin: 20 }}>
+                    <View style={{ backgroundColor: "#D9D9D9", margin: 20, borderRadius:10 }}>
                         <TextInput
                             label="Full Name"
                             mode="outlined"

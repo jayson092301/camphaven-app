@@ -218,7 +218,7 @@ const ListingDetails = () => {
       {/* Modal for showing images */}
       <Modal visible={isModalVisible} animationType="slide" onRequestClose={closeModal}>
         <View style={styles.modalContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <ScrollView vertical showsVerticalScrollIndicator={false}>
             {images.map((img, index) => (
               <Image key={index} source={{ uri: img.image_url }} style={styles.modalImage} />
             ))}
@@ -247,8 +247,8 @@ const styles = StyleSheet.create({
   buttonContainer: { flexDirection: "row", justifyContent: "space-around", marginTop: 20 },
   button: { width: 380, height: 40, backgroundColor: "#000", justifyContent: "center", alignItems: "center", borderRadius: 10 },
   buttonText: { color: "#E8CDB2", fontSize: 18 },
-  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  modalImage: { width: 200, height: 200, marginHorizontal: 10 },
+  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', },
+  modalImage: { width: 390, height: 200, marginHorizontal: 10, marginVertical:10, borderRadius: 10 },
   closeButton: { padding: 10, backgroundColor: '#000', borderRadius: 5, marginTop: 20 },
   closeButtonText: { color: '#fff', fontSize: 16 },
 });
