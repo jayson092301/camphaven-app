@@ -3,6 +3,7 @@ import { View, Image, StyleSheet, Alert, Text, TouchableOpacity, TouchableWithou
 import { TextInput, Menu, Provider } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import supabase from "../../supabase";
+import { router } from "expo-router";
 
 export default function UploadImage() {
     const [lists, setLists] = useState([]); // State to hold the listing data
@@ -101,6 +102,7 @@ export default function UploadImage() {
             if (insertError) throw insertError;
 
             Alert.alert("Success", "Image uploaded successfully!");
+            router.push("adminpage")
         } catch (error) {
             console.error("Error during submission:", error);
             Alert.alert("Error", `Something went wrong: ${error.message}`);

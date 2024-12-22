@@ -87,8 +87,9 @@ export default function Profile() {
         <ScrollView>
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.headerText}>Profile Details</Text>
+                <Text style={styles.headerText}>Profile</Text>
                 <Avatar.Image size={200} source={require('../../../../assets/img/avatar.png')} />
+                <Text style={styles.userName}>{name}</Text>
             </View>
             
             <View style={styles.infoContainer}>
@@ -155,8 +156,8 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     headerText: {
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: 20,
+        fontWeight: '400',
     },
     infoContainer: {
         marginVertical: 20,
@@ -189,4 +190,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign:"center"
     },
+    userName: {
+        fontSize: 24,
+        fontWeight: '500',
+        marginTop: 10,
+    }
 });

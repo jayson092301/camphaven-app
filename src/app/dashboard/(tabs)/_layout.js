@@ -14,8 +14,8 @@ export default function Dashboard() {
             />
             <Tabs.Screen name = 'notif'
                 options={{
-                    title:'Notification',
-                    tabBarIcon: ({focused}) => < Icon source = {focused ? 'bell':'bell-outline'} size={24} color= 'black'/>
+                    title:'Transaction',
+                    tabBarIcon: ({focused}) => < Icon source = {focused ? 'hand-coin':'hand-coin-outline'} size={24} color= 'black'/>
                 }}
             />
             <Tabs.Screen name = 'profile'

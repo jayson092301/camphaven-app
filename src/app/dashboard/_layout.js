@@ -12,10 +12,10 @@ export default function DrawerLayout() {
                     title: 'Menu'
                 }}/>
                 <Drawer.Screen
-                name="settings"
+                name="profile"
                 options={{
-                    drawerLabel:'Setting',
-                    title: 'Settings'
+                    drawerLabel:'Profile',
+                    title: 'Details'
                 }}/>
             </Drawer>
         </GestureHandlerRootView>

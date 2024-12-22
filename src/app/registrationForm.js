@@ -10,9 +10,11 @@ export default function RegistrationForm() {
     const [email, setEmail] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
     const [password, setPassword] = useState("");
-    const [university, setUniversity] = useState("");  // Store selected university_id
+    const [university, setUniversity] = useState(""); // Store selected university_id
+    const [userType, setUserType] = useState("student"); // Default user type
     const [universities, setUniversities] = useState([]); // List of universities
-    const [menuVisible, setMenuVisible] = useState(false); // For controlling the dropdown
+    const [userTypeMenuVisible, setUserTypeMenuVisible] = useState(false); // For controlling user type dropdown
+    const [universityMenuVisible, setUniversityMenuVisible] = useState(false); // For controlling university dropdown
     const [loading, setLoading] = useState(false); // For loading state
     const [fontsLoaded] = useFonts({
         Italiano: require('../../assets/fonts/Italianno-Regular.ttf'),
@@ -59,17 +61,15 @@ export default function RegistrationForm() {
             // Now insert the user data into the custom user table
             const { error: insertError } = await supabase
                 .from("users")
-                .insert([
-                    {
-                        
-                        name: fullName,
-                        email: email,
-                        phone_number: phoneNumber,
-                        password: password,
-                        university_id: university,
-                        created_at: new Date(),
-                    },
-                ]);
+                .insert([{
+                    name: fullName,
+                    email: email,
+                    phone_number: phoneNumber,
+                    password: password,
+                    university_id: university,
+                    user_type: userType, // Store the user type
+                    created_at: new Date(),
+                }]);
 
             if (insertError) {
                 throw insertError;
@@ -105,7 +105,7 @@ export default function RegistrationForm() {
                     <Text style={{ fontFamily: "Italianno", fontSize: 40 }}>Complete the following</Text>
                 </View>
                 <ScrollView contentContainerStyle={styles.scrollContainer}>
-                    <View style={{ backgroundColor: "#D9D9D9", margin: 20, borderRadius:10 }}>
+                    <View style={{ backgroundColor: "#D9D9D9", margin: 20, borderRadius: 10 }}>
                         <TextInput
                             label="Full Name"
                             mode="outlined"
@@ -113,6 +113,36 @@ export default function RegistrationForm() {
                             value={fullName}
                             onChangeText={setFullName}
                         />
+                        {/* Dropdown for User Type */}
+                        <Menu
+                            visible={userTypeMenuVisible}
+                            onDismiss={() => setUserTypeMenuVisible(false)}
+                            anchor={
+                                <TextInput
+                                    label="Select"
+                                    mode="outlined"
+                                    style={{ margin: 10 }}
+                                    value={userType === "student" ? "Student" : "Admin"}
+                                    onFocus={() => setUserTypeMenuVisible(true)} // Show menu on focus
+                                />
+                            }
+                        >
+                            <Menu.Item
+                                onPress={() => {
+                                    setUserType("student"); // Set the user type
+                                    setUserTypeMenuVisible(false); // Close the dropdown
+                                }}
+                                title="Student"
+                            />
+                            <Menu.Item
+                                onPress={() => {
+                                    setUserType("admin"); // Set the user type
+                                    setUserTypeMenuVisible(false); // Close the dropdown
+                                }}
+                                title="Admin"
+                            />
+                        </Menu>
+
                         <TextInput
                             label="Email Address"
                             mode="outlined"
@@ -137,15 +167,15 @@ export default function RegistrationForm() {
                         />
                         {/* Dropdown for University */}
                         <Menu
-                            visible={menuVisible}
-                            onDismiss={() => setMenuVisible(false)}
+                            visible={universityMenuVisible}
+                            onDismiss={() => setUniversityMenuVisible(false)}
                             anchor={
                                 <TextInput
                                     label="University Name"
                                     mode="outlined"
                                     style={{ margin: 10, marginBottom: 50 }}
                                     value={university ? universities.find(u => u.university_id === university)?.name : ''}
-                                    onFocus={() => setMenuVisible(true)} // Show menu on focus
+                                    onFocus={() => setUniversityMenuVisible(true)} // Show menu on focus
                                 />
                             }
                         >
@@ -154,7 +184,7 @@ export default function RegistrationForm() {
                                     key={univ.university_id}
                                     onPress={() => {
                                         setUniversity(univ.university_id); // Set the university_id
-                                        setMenuVisible(false); // Close the dropdown
+                                        setUniversityMenuVisible(false); // Close the dropdown
                                     }}
                                     title={univ.name}
                                 />

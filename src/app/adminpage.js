@@ -16,11 +16,11 @@ export default function Admi_Page() {
             <View style={{justifyContent:'center', alignItems:'center', flexDirection: 'column', marginTop:250}}>
                 <View>
                     <TouchableOpacity style={styles.button} onPress={() => router.push('admin_form')}>
-                        <Text style={styles.buttonText}>Add Land</Text>
+                        <Text style={styles.buttonText}>Add Landlord</Text>
                     </TouchableOpacity>
                 </View>
                 <View>
-                    <TouchableOpacity style={styles.button} onPress={() => console.log('user management')}>
+                    <TouchableOpacity style={styles.button} onPress={() => router.push('adminLogin')}>
                         <Text style={styles.buttonText}>User Management</Text>
                     </TouchableOpacity>
                 </View>

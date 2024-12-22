@@ -1,9 +1,10 @@
+import React from "react";
 import { View, Text } from "react-native";
 
-export default function Setting() {
+export default function (){
     return(
         <View>
-            <Text>Settings</Text>
+            <Text> Hello Admin</Text>
         </View>
     )
 }

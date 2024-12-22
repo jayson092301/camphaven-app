@@ -44,13 +44,13 @@ const handleLogin = async () => {
         }
 
         // Check if the user is a student
-        if (data.user_type !== "student") {
-            Alert.alert("Access Denied", "Only students are allowed to log in.");
+        if (data.user_type !== "admin") {
+            Alert.alert("Access Denied", "Only admin are allowed to log in.");
             return; // Prevent login if the user is not a student
         }
 
         Alert.alert("Success", "You have successfully logged in!");
-        router.replace("dashboard");
+        router.replace("adminDashboard");
     } catch (error) {
         console.error(error);
         Alert.alert("Error", error.message || "An error occurred during login.");
@@ -107,14 +107,6 @@ const handleLogin = async () => {
                     <TouchableOpacity style={styles.button} onPress={handleLogin}>
                     <Text style={styles.buttonText}>Log in</Text>
                     </TouchableOpacity>
-                </View>
-                <View style={{ alignItems: 'center', marginTop: 10, marginBottom:20 }}>
-                    <Text style={{ fontFamily: 'Italianno', fontSize: 20 }}>
-                        Don't have an account?{' '}
-                        <Text style={{ color: 'red', fontWeight:'bold' }} onPress={() => router.push('registrationForm')}>
-                            Register
-                        </Text>
-                    </Text>
                 </View>
             </View>
     );
