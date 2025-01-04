@@ -45,14 +45,20 @@ export default function UploadImage() {
 
     // Open image picker
     const pickImage = async () => {
+        console.log('Attempting to pick an image...'); // Log to see if this function is triggered
+        
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: [ImagePicker.MediaType.IMAGE], // Correct media type usage
             allowsEditing: true,
             quality: 1,
         });
 
+        console.log('ImagePicker result:', result); // Debugging log
+
         if (!result.canceled) {
             setImage(result.assets[0].uri); // Save the selected image URI
+        } else {
+            console.log("Image selection was canceled");
         }
     };
 
@@ -102,7 +108,7 @@ export default function UploadImage() {
             if (insertError) throw insertError;
 
             Alert.alert("Success", "Image uploaded successfully!");
-            router.push("adminpage")
+            router.push("adminpage");
         } catch (error) {
             console.error("Error during submission:", error);
             Alert.alert("Error", `Something went wrong: ${error.message}`);

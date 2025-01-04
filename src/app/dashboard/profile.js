@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from "react-native";
 import { Avatar, Icon } from "react-native-paper";
 import { useRouter } from "expo-router";
 import supabase from "../../../supabase";
@@ -90,10 +90,29 @@ export default function Profile() {
             </View>
             </ScrollView>
             <View style={styles.submitContainer}>
-                <TouchableOpacity style={styles.button} onPress={() => router.replace('/')}>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() =>
+                        Alert.alert(
+                            "Confirm Log Out",
+                            "Are you sure you want to log out?",
+                            [
+                                {
+                                    text: "Cancel",
+                                    style: "cancel",
+                                },
+                                {
+                                    text: "Log Out",
+                                    onPress: () => router.replace('/'), // Log-out action
+                                },
+                            ]
+                        )
+                    }
+                >
                     <Text style={styles.buttonText}>Log Out</Text>
                 </TouchableOpacity>
             </View>
+
         </View>
     );
 }

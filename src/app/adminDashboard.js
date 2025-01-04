@@ -13,10 +13,10 @@ export default function (){
                 <TouchableOpacity style={styles.button} onPress={() => router.push('addCampList')}>
                     <Text style={styles.buttonText}>Add Camp Listing</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={() => console.log('Press')}>
-                    <Text style={styles.buttonText}>Manage Renters</Text>
+                <TouchableOpacity style={styles.button} onPress={() => router.push('image')}>
+                    <Text style={styles.buttonText}>Add Image</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={() => console.log('Press')}>
+                <TouchableOpacity style={styles.button} onPress={() => router.push('booking')}>
                     <Text style={styles.buttonText}>Manage Bookings</Text>
                 </TouchableOpacity>
             </View>

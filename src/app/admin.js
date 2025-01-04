@@ -4,24 +4,14 @@ import { useRouter } from "expo-router";
 
 export default function Admin() {
     const router = useRouter();
-    const [password, setPassword] = useState(""); // Add state for password
 
     return (
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
             <Text style={styles.title}>Admin Mode</Text>
 
-            {/* Password Input */}
-            <TextInput
-                placeholder="Enter Password"
-                secureTextEntry
-                style={styles.textInput}
-                value={password}
-                onChangeText={setPassword}
-            />
-
             {/* Button */}
-            <TouchableOpacity style={styles.button} onPress={() => router.push('adminpage')}>
-                <Text style={styles.buttonText}>Log in</Text>
+            <TouchableOpacity style={styles.button} onPress={() => router.push('adminLogin')}>
+                <Text style={styles.buttonText}>Continue</Text>
             </TouchableOpacity>
         </View>
     );

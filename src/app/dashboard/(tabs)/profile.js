@@ -136,7 +136,22 @@ export default function Profile() {
                 )}
                 <TouchableOpacity
                     style={[styles.button]}
-                    onPress={() => router.replace('/')}
+                    onPress={() =>
+                        Alert.alert(
+                            "Confirm Log Out",
+                            "Are you sure you want to log out?",
+                            [
+                                {
+                                    text: "Cancel",
+                                    style: "cancel",
+                                },
+                                {
+                                    text: "Log Out",
+                                    onPress: () => router.replace('/'),
+                                },
+                            ]
+                        )
+                    }
                 >
                     <Text style={styles.buttonText}>Log Out</Text>
                 </TouchableOpacity>
