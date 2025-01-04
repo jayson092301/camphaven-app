@@ -31,7 +31,7 @@ export default function CampListing() {
         const fetchOwners = async () => {
             try {
                 const { data, error } = await supabase
-                    .from("apartment_owners") // Assuming "apartment_owners" is the correct table name
+                    .from("apartment_owners") 
                     .select("owner_id, name");
 
                 if (error) {
