@@ -1,14 +1,16 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
 
 export default function (){
+    const router = useRouter();
     return(
         <View style={{alignItems:'center', justifyContent:'center'}}>
             <View>
                 <Text style={{textAlign:'center', fontSize:24, fontWeight:'bold', margin:100}}>So, what's the move?</Text>
             </View>
             <View style={{backgroundColor: '#D9D9D9', padding:75, borderRadius: 10,}}>
-                <TouchableOpacity style={styles.button} onPress={() => console.log('Press')}>
+                <TouchableOpacity style={styles.button} onPress={() => router.push('addCampList')}>
                     <Text style={styles.buttonText}>Add Camp Listing</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.button} onPress={() => console.log('Press')}>

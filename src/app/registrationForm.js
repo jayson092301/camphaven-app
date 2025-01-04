@@ -19,6 +19,7 @@ export default function RegistrationForm() {
     const [fontsLoaded] = useFonts({
         Italiano: require('../../assets/fonts/Italianno-Regular.ttf'),
     });
+    const [address, setAddress] = useState("");
 
     const router = useRouter();
 
@@ -41,11 +42,25 @@ export default function RegistrationForm() {
 
     // Handle user registration
     const handleRegistration = async () => {
-        if (!fullName || !email || !phoneNumber || !password || !university) {
-            Alert.alert("Error", "Please fill in all fields.");
+        if (
+            !fullName || 
+            !email || 
+            !phoneNumber || 
+            !password || 
+            (userType === "student" && !university) || 
+            (userType === "admin" && !address)
+        ) {
+            Alert.alert(
+                "Error",
+                userType === "student" && !university
+                    ? "University is required for student registration."
+                    : userType === "admin" && !address
+                    ? "Address is required for admin registration."
+                    : "Please fill in all fields."
+            );
             return;
         }
-
+    
         setLoading(true); // Start loading
         try {
             // First, sign up the user with Supabase Authentication
@@ -53,12 +68,12 @@ export default function RegistrationForm() {
                 email,
                 password,
             });
-
+    
             if (signUpError) {
                 throw signUpError;
             }
-
-            // Now insert the user data into the custom user table
+    
+            // Insert user data into the custom user table
             const { error: insertError } = await supabase
                 .from("users")
                 .insert([{
@@ -66,19 +81,34 @@ export default function RegistrationForm() {
                     email: email,
                     phone_number: phoneNumber,
                     password: password,
-                    university_id: university,
-                    user_type: userType, // Store the user type
+                    university_id: userType === "student" ? university : null, // Only store university for students
+                    user_type: userType,
                     created_at: new Date(),
                 }]);
-
+    
             if (insertError) {
                 throw insertError;
             }
-
+    
+            // If the user is an admin, insert details into the apartment_owners table
+            if (userType === "admin") {
+                const { error: ownerInsertError } = await supabase
+                    .from("apartment_owners")
+                    .insert([{
+                        name: fullName,
+                        email: email,
+                        phone_number: phoneNumber,
+                        address: address,
+                        created_at: new Date(),
+                    }]);
+    
+                if (ownerInsertError) {
+                    throw ownerInsertError;
+                }
+            }
+    
             Alert.alert("Success", "Registration successful! Please log in.");
-            // Redirect to Sign-In page after successful registration
-            router.push("signin"); 
-
+            router.push("signin"); // Redirect to sign-in page
         } catch (error) {
             console.error(error);
             Alert.alert("Error", error.message || "An error occurred during registration.");
@@ -86,6 +116,7 @@ export default function RegistrationForm() {
             setLoading(false); // Stop loading
         }
     };
+    
 
     if (!fontsLoaded) {
         return <Text>Loading...</Text>;
@@ -129,19 +160,34 @@ export default function RegistrationForm() {
                         >
                             <Menu.Item
                                 onPress={() => {
-                                    setUserType("student"); // Set the user type
-                                    setUserTypeMenuVisible(false); // Close the dropdown
+                                    setUserType("student");
+                                    setAddress(""); // Clear address if switching to student
+                                    setUniversity(""); // Clear university if switching to admin
+                                    setUserTypeMenuVisible(false);
                                 }}
                                 title="Student"
                             />
                             <Menu.Item
                                 onPress={() => {
-                                    setUserType("admin"); // Set the user type
-                                    setUserTypeMenuVisible(false); // Close the dropdown
+                                    setUserType("admin");
+                                    setUserTypeMenuVisible(false);
                                 }}
                                 title="Admin"
                             />
                         </Menu>
+
+                        {/* Conditional Address Input */}
+                        {userType === "admin" && (
+                            <TextInput
+                                label="Address"
+                                mode="outlined"
+                                style={{ margin: 10 }}
+                                value={address}
+                                onChangeText={setAddress}
+                            />
+                        )}
+
+                        
 
                         <TextInput
                             label="Email Address"
@@ -165,31 +211,33 @@ export default function RegistrationForm() {
                             value={password}
                             onChangeText={setPassword}
                         />
-                        {/* Dropdown for University */}
-                        <Menu
-                            visible={universityMenuVisible}
-                            onDismiss={() => setUniversityMenuVisible(false)}
-                            anchor={
-                                <TextInput
-                                    label="University Name"
-                                    mode="outlined"
-                                    style={{ margin: 10, marginBottom: 50 }}
-                                    value={university ? universities.find(u => u.university_id === university)?.name : ''}
-                                    onFocus={() => setUniversityMenuVisible(true)} // Show menu on focus
-                                />
-                            }
-                        >
-                            {universities.map((univ) => (
-                                <Menu.Item
-                                    key={univ.university_id}
-                                    onPress={() => {
-                                        setUniversity(univ.university_id); // Set the university_id
-                                        setUniversityMenuVisible(false); // Close the dropdown
-                                    }}
-                                    title={univ.name}
-                                />
-                            ))}
-                        </Menu>
+                        {/* Conditional University Input */}
+                        {userType === "student" && (
+                            <Menu
+                                visible={universityMenuVisible}
+                                onDismiss={() => setUniversityMenuVisible(false)}
+                                anchor={
+                                    <TextInput
+                                        label="University Name"
+                                        mode="outlined"
+                                        style={{ margin: 10, marginBottom: 50 }}
+                                        value={university ? universities.find(u => u.university_id === university)?.name : ''}
+                                        onFocus={() => setUniversityMenuVisible(true)} // Show menu on focus
+                                    />
+                                }
+                            >
+                                {universities.map((univ) => (
+                                    <Menu.Item
+                                        key={univ.university_id}
+                                        onPress={() => {
+                                            setUniversity(univ.university_id); // Set the university_id
+                                            setUniversityMenuVisible(false); // Close the dropdown
+                                        }}
+                                        title={univ.name}
+                                    />
+                                ))}
+                            </Menu>
+                        )}
                     </View>
                 </ScrollView>
                 <View style={styles.submitContainer}>
